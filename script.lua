@@ -45,8 +45,8 @@ MainFrame.Parent = MainGUI
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 2
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-MainFrame.Size = UDim2.new(0, 500, 0, 400)
-MainFrame.Position = UDim2.new(1, -510, 0, 10)
+MainFrame.Size = UDim2.new(0, 420, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -160)
 MainFrame.Visible = false
 
 CloseButton.Name = "CloseButton"
@@ -62,6 +62,400 @@ CloseButton.ZIndex = 2
 
 ScrollFrame.Parent = MainFrame
 ScrollFrame.Size = UDim2.new(1, -10, 1, -30)
+ScrollFrame.Position = UDim2.new(0, 5, 0, 25)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+ScrollFrame.ScrollBarThickness = 5
+
+UIListLayout.Parent = ScrollFrame
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- NoClip
+local NoClipToggle = Instance.new("TextButton")
+NoClipToggle.Size = UDim2.new(0.9, 0, 0, 30)
+NoClipToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+NoClipToggle.Text = "NoClip: OFF"
+NoClipToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoClipToggle.TextSize = 14
+NoClipToggle.Parent = ScrollFrame
+
+local noclip = false
+local noclipConnection
+NoClipToggle.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    NoClipToggle.Text = "NoClip: " .. (noclip and "ON" or "OFF")
+    
+    if noclip then
+        noclipConnection = RunService.Stepped:Connect(function()
+            if LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+        end
+    end
+end)
+
+-- Infinite Jump
+local InfJumpToggle = Instance.new("TextButton")
+InfJumpToggle.Size = UDim2.new(0.9, 0, 0, 30)
+InfJumpToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+InfJumpToggle.Text = "Infinity Jump: OFF"
+InfJumpToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfJumpToggle.TextSize = 14
+InfJumpToggle.Parent = ScrollFrame
+
+local infiniteJump = false
+InfJumpToggle.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    InfJumpToggle.Text = "Infinity Jump: " .. (infiniteJump and "ON" or "OFF")
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump and LocalPlayer.Character then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+-- ESP
+local ESPToggle = Instance.new("TextButton")
+ESPToggle.Size = UDim2.new(0.9, 0, 0, 30)
+ESPToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ESPToggle.Text = "ESP: OFF"
+ESPToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ESPToggle.TextSize = 14
+ESPToggle.Parent = ScrollFrame
+
+local espEnabled = false
+local espBoxes = {}
+
+local function getPlayerRole(player)
+    local character = player.Character
+    if character then
+        -- Проверяем инструменты в инвентаре
+        local backpack = player:FindFirstChild("Backpack")
+        if backpack then
+            for _, tool in pairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") then
+                    if string.lower(tool.Name) == "knife" then
+                        return "Murderer"
+                    elseif string.lower(tool.Name) == "gun" then
+                        return "Sheriff"
+                    end
+                end
+            end
+        end
+        
+        -- Проверяем инструменты в руках
+        local tool = character:FindFirstChildOfClass("Tool")
+        if tool then
+            if string.lower(tool.Name) == "knife" then
+                return "Murderer"
+            elseif string.lower(tool.Name) == "gun" then
+                return "Sheriff"
+            end
+        end
+    end
+    return "Innocent"
+end
+
+local function createESP(player)
+    local espBox = Instance.new("Highlight")
+    espBox.Name = player.Name .. "ESP"
+    espBox.Adornee = nil
+    espBox.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    espBox.Enabled = false
+    espBox.Parent = game.CoreGui
+    
+    espBoxes[player] = espBox
+    
+    local function updateESP()
+        if espEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            espBox.Adornee = player.Character
+            espBox.Enabled = true
+            
+            local role = getPlayerRole(player)
+            if role == "Murderer" then
+                espBox.FillColor = Color3.fromRGB(255, 0, 0)
+                espBox.OutlineColor = Color3.fromRGB(255, 0, 0)
+            elseif role == "Sheriff" then
+                espBox.FillColor = Color3.fromRGB(0, 0, 255)
+                espBox.OutlineColor = Color3.fromRGB(0, 0, 255)
+            else
+                espBox.FillColor = Color3.fromRGB(0, 255, 0)
+                espBox.OutlineColor = Color3.fromRGB(0, 255, 0)
+            end
+        else
+            espBox.Enabled = false
+        end
+    end
+    
+    player.CharacterAdded:Connect(function(character)
+        wait(1) -- Ждем загрузки персонажа
+        updateESP()
+    end)
+    
+    -- Обновляем при изменении инвентаря
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        backpack.ChildAdded:Connect(updateESP)
+        backpack.ChildRemoved:Connect(updateESP)
+    end
+    
+    updateESP()
+end
+
+ESPToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    ESPToggle.Text = "ESP: " .. (espEnabled and "ON" or "OFF")
+    
+    if espEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                createESP(player)
+            end
+        end
+    else
+        for player, espBox in pairs(espBoxes) do
+            espBox:Destroy()
+        end
+        espBoxes = {}
+    end
+end)
+
+-- Fly
+local FlyToggle = Instance.new("TextButton")
+FlyToggle.Size = UDim2.new(0.9, 0, 0, 30)
+FlyToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+FlyToggle.Text = "Fly: OFF"
+FlyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyToggle.TextSize = 14
+FlyToggle.Parent = ScrollFrame
+
+local flying = false
+local flyConnection
+local flyBV
+
+FlyToggle.MouseButton1Click:Connect(function()
+    flying = not flying
+    FlyToggle.Text = "Fly: " .. (flying and "ON" or "OFF")
+    
+    if flying then
+        -- Автоматически включаем NoClip
+        if not noclip then
+            noclip = true
+            NoClipToggle.Text = "NoClip: ON"
+            noclipConnection = RunService.Stepped:Connect(function()
+                if LocalPlayer.Character then
+                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end
+        
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if humanoid and rootPart then
+                humanoid.PlatformStand = true
+                
+                flyBV = Instance.new("BodyVelocity")
+                flyBV.Velocity = Vector3.new(0, 0, 0)
+                flyBV.MaxForce = Vector3.new(40000, 40000, 40000)
+                flyBV.Parent = rootPart
+                
+                flyConnection = RunService.Heartbeat:Connect(function()
+                    if character and rootPart then
+                        local cam = workspace.CurrentCamera
+                        local lookVector = cam.CFrame.LookVector
+                        
+                        -- Определяем направление по джойстику
+                        local moveDirection = Vector3.new()
+                        if UserInputService:GetLastInputType() == Enum.UserInputType.Touch then
+                            local touchInputs = UserInputService:GetConnectedGamepads()
+                            if #touchInputs > 0 then
+                                local thumbstick = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+                                -- Симуляция джойстика для мобильного управления
+                                moveDirection = lookVector
+                            end
+                        else
+                            -- Клавиатура
+                            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                                moveDirection = moveDirection + lookVector
+                            end
+                            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                                moveDirection = moveDirection - lookVector
+                            end
+                            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                                moveDirection = moveDirection - cam.CFrame.RightVector
+                            end
+                            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                                moveDirection = moveDirection + cam.CFrame.RightVector
+                            end
+                        end
+                        
+                        -- Вертикальное движение
+                        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                            moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                        end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                            moveDirection = moveDirection - Vector3.new(0, 1, 0)
+                        end
+                        
+                        -- Если есть направление движения, летим вперед по взгляду
+                        if moveDirection.Magnitude > 0 then
+                            flyBV.Velocity = lookVector * 50
+                        else
+                            flyBV.Velocity = Vector3.new(0, 0, 0)
+                        end
+                    end
+                end)
+            end
+        end
+    else
+        if flyConnection then
+            flyConnection:Disconnect()
+        end
+        
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if humanoid then
+                humanoid.PlatformStand = false
+            end
+            
+            if rootPart and flyBV then
+                flyBV:Destroy()
+            end
+        end
+    end
+end)
+
+-- Speed
+local SpeedFrame = Instance.new("Frame")
+SpeedFrame.Size = UDim2.new(0.9, 0, 0, 50)
+SpeedFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SpeedFrame.Parent = ScrollFrame
+
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Size = UDim2.new(0.7, 0, 0.5, 0)
+SpeedLabel.Position = UDim2.new(0, 0, 0, 0)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Text = "Speed: 30"
+SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedLabel.TextSize = 14
+SpeedLabel.Parent = SpeedFrame
+
+local SpeedMinus = Instance.new("TextButton")
+SpeedMinus.Size = UDim2.new(0.1, 0, 0.5, 0)
+SpeedMinus.Position = UDim2.new(0.7, 0, 0, 0)
+SpeedMinus.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+SpeedMinus.Text = "–"
+SpeedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedMinus.TextSize = 16
+SpeedMinus.Parent = SpeedFrame
+
+local currentSpeed = 30
+local speedConnection
+
+local function updateSpeed(newSpeed)
+    currentSpeed = math.clamp(newSpeed, 30, 300)
+    SpeedLabel.Text = "Speed: " .. currentSpeed
+    
+    if speedConnection then
+        speedConnection:Disconnect()
+    end
+    
+    speedConnection = RunService.Heartbeat:Connect(function()
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = currentSpeed
+            end
+        end
+    end)
+end
+
+SpeedMinus.MouseButton1Click:Connect(function()
+    local SpeedConfig = Instance.new("Frame")
+    SpeedConfig.Name = "SpeedConfig"
+    SpeedConfig.Parent = MainGUI
+    SpeedConfig.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    SpeedConfig.BorderSizePixel = 2
+    SpeedConfig.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedConfig.Size = UDim2.new(0, 200, 0, 150)
+    SpeedConfig.Position = UDim2.new(0.5, -100, 0.5, -75)
+    
+    local SpeedSlider = Instance.new("TextButton")
+    SpeedSlider.Size = UDim2.new(0.8, 0, 0, 30)
+    SpeedSlider.Position = UDim2.new(0.1, 0, 0.3, 0)
+    SpeedSlider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    SpeedSlider.Text = "Set Speed: " .. currentSpeed
+    SpeedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedSlider.TextSize = 14
+    SpeedSlider.Parent = SpeedConfig
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(0.3, 0, 0, 25)
+    CloseButton.Position = UDim2.new(0.35, 0, 0.7, 0)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    CloseButton.Text = "Close"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 14
+    CloseButton.Parent = SpeedConfig
+    
+    SpeedSlider.MouseButton1Click:Connect(function()
+        currentSpeed = currentSpeed < 300 and currentSpeed + 30 or 30
+        SpeedSlider.Text = "Set Speed: " .. currentSpeed
+        updateSpeed(currentSpeed)
+    end)
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        SpeedConfig:Destroy()
+    end)
+end)
+
+updateSpeed(30)
+
+-- Open/Close Menu
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    DragFrame.Visible = false
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    DragFrame.Visible = true
+end)
+
+-- Player added ESP
+Players.PlayerAdded:Connect(function(player)
+    if espEnabled then
+        createESP(player)
+    end
+end)
+
+-- Initial ESP setup
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer and espEnabled then
+        createESP(player)
+    end
+endScrollFrame.Size = UDim2.new(1, -10, 1, -30)
 ScrollFrame.Position = UDim2.new(0, 5, 0, 25)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 ScrollFrame.ScrollBarThickness = 5
