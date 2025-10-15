@@ -20,8 +20,8 @@ DragFrame.Parent = MainGUI
 DragFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 DragFrame.BorderSizePixel = 2
 DragFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-DragFrame.Size = UDim2.new(0, 100, 0, 100)
-DragFrame.Position = UDim2.new(0.5, -50, 0.5, -50)
+DragFrame.Size = UDim2.new(0, 25, 0, 25)
+DragFrame.Position = UDim2.new(0, 10, 0, 10)
 DragFrame.Active = true
 DragFrame.Draggable = true
 
@@ -31,39 +31,53 @@ OpenButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 OpenButton.Size = UDim2.new(1, 0, 1, 0)
 OpenButton.Text = "LR"
 OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenButton.TextSize = 20
+OpenButton.TextSize = 12
+OpenButton.TextScaled = true
 
 -- Main Menu
 local MainFrame = Instance.new("Frame")
 local ScrollFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
+local CloseButton = Instance.new("TextButton")
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = MainGUI
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 2
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-MainFrame.Size = UDim2.new(0, 1000, 0, 800)
-MainFrame.Position = UDim2.new(0.5, -500, 0.5, -400)
+MainFrame.Size = UDim2.new(0, 500, 0, 400)
+MainFrame.Position = UDim2.new(1, -510, 0, 10)
 MainFrame.Visible = false
 
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+CloseButton.BorderSizePixel = 0
+CloseButton.Size = UDim2.new(0, 20, 0, 20)
+CloseButton.Position = UDim2.new(1, -25, 0, 5)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 14
+CloseButton.ZIndex = 2
+
 ScrollFrame.Parent = MainFrame
-ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
+ScrollFrame.Size = UDim2.new(1, -10, 1, -30)
+ScrollFrame.Position = UDim2.new(0, 5, 0, 25)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 ScrollFrame.ScrollBarThickness = 5
 
 UIListLayout.Parent = ScrollFrame
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 10)
+UIListLayout.Padding = UDim.new(0, 5)
 
 -- NoClip
 local NoClipToggle = Instance.new("TextButton")
-NoClipToggle.Size = UDim2.new(0.9, 0, 0, 50)
+NoClipToggle.Size = UDim2.new(0.9, 0, 0, 30)
 NoClipToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 NoClipToggle.Text = "NoClip: OFF"
 NoClipToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoClipToggle.TextSize = 16
+NoClipToggle.TextSize = 14
 NoClipToggle.Parent = ScrollFrame
 
 local noclip = false
@@ -91,11 +105,11 @@ end)
 
 -- Infinite Jump
 local InfJumpToggle = Instance.new("TextButton")
-InfJumpToggle.Size = UDim2.new(0.9, 0, 0, 50)
+InfJumpToggle.Size = UDim2.new(0.9, 0, 0, 30)
 InfJumpToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 InfJumpToggle.Text = "Infinity Jump: OFF"
 InfJumpToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfJumpToggle.TextSize = 16
+InfJumpToggle.TextSize = 14
 InfJumpToggle.Parent = ScrollFrame
 
 local infiniteJump = false
@@ -112,11 +126,11 @@ end)
 
 -- ESP
 local ESPToggle = Instance.new("TextButton")
-ESPToggle.Size = UDim2.new(0.9, 0, 0, 50)
+ESPToggle.Size = UDim2.new(0.9, 0, 0, 30)
 ESPToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 ESPToggle.Text = "ESP: OFF"
 ESPToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-ESPToggle.TextSize = 16
+ESPToggle.TextSize = 14
 ESPToggle.Parent = ScrollFrame
 
 local espEnabled = false
@@ -193,11 +207,11 @@ end)
 
 -- Fly
 local FlyToggle = Instance.new("TextButton")
-FlyToggle.Size = UDim2.new(0.9, 0, 0, 50)
+FlyToggle.Size = UDim2.new(0.9, 0, 0, 30)
 FlyToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 FlyToggle.Text = "Fly: OFF"
 FlyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyToggle.TextSize = 16
+FlyToggle.TextSize = 14
 FlyToggle.Parent = ScrollFrame
 
 local flying = false
@@ -275,7 +289,7 @@ end)
 
 -- Speed
 local SpeedFrame = Instance.new("Frame")
-SpeedFrame.Size = UDim2.new(0.9, 0, 0, 80)
+SpeedFrame.Size = UDim2.new(0.9, 0, 0, 50)
 SpeedFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 SpeedFrame.Parent = ScrollFrame
 
@@ -285,7 +299,7 @@ SpeedLabel.Position = UDim2.new(0, 0, 0, 0)
 SpeedLabel.BackgroundTransparency = 1
 SpeedLabel.Text = "Speed: 30"
 SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedLabel.TextSize = 16
+SpeedLabel.TextSize = 14
 SpeedLabel.Parent = SpeedFrame
 
 local SpeedMinus = Instance.new("TextButton")
@@ -294,7 +308,7 @@ SpeedMinus.Position = UDim2.new(0.7, 0, 0, 0)
 SpeedMinus.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 SpeedMinus.Text = "–"
 SpeedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedMinus.TextSize = 20
+SpeedMinus.TextSize = 16
 SpeedMinus.Parent = SpeedFrame
 
 local currentSpeed = 30
@@ -326,8 +340,8 @@ SpeedMinus.MouseButton1Click:Connect(function()
     SpeedConfig.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     SpeedConfig.BorderSizePixel = 2
     SpeedConfig.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    SpeedConfig.Size = UDim2.new(0, 300, 0, 200)
-    SpeedConfig.Position = UDim2.new(0.5, -150, 0.5, -100)
+    SpeedConfig.Size = UDim2.new(0, 200, 0, 150)
+    SpeedConfig.Position = UDim2.new(0.5, -100, 0.5, -75)
     
     local SpeedSlider = Instance.new("TextButton")
     SpeedSlider.Size = UDim2.new(0.8, 0, 0, 30)
@@ -335,16 +349,16 @@ SpeedMinus.MouseButton1Click:Connect(function()
     SpeedSlider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     SpeedSlider.Text = "Set Speed: " .. currentSpeed
     SpeedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SpeedSlider.TextSize = 16
+    SpeedSlider.TextSize = 14
     SpeedSlider.Parent = SpeedConfig
     
     local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0.3, 0, 0, 30)
+    CloseButton.Size = UDim2.new(0.3, 0, 0, 25)
     CloseButton.Position = UDim2.new(0.35, 0, 0.7, 0)
     CloseButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     CloseButton.Text = "Close"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.TextSize = 16
+    CloseButton.TextSize = 14
     CloseButton.Parent = SpeedConfig
     
     SpeedSlider.MouseButton1Click:Connect(function()
@@ -362,8 +376,13 @@ updateSpeed(30)
 
 -- Open/Close Menu
 OpenButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-    DragFrame.Visible = not MainFrame.Visible
+    MainFrame.Visible = true
+    DragFrame.Visible = false
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    DragFrame.Visible = true
 end)
 
 -- Player added ESP
